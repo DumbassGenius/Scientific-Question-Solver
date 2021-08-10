@@ -28,8 +28,10 @@ class Expression(object):
             self.variables.add(operand)
         elif isinstance(operand,Expression):
             self.variables= self.variables.union(operand.variables)
-        else:
+        elif isinstance(operand,float) or isinstance(operand,int):
             operand = float(operand)
+        else:
+            raise Exception("Invalid operand")
         exp.append((operator,operand))
         return self
 
@@ -37,18 +39,46 @@ class Expression(object):
     "then applies the function equavalent to the given operator to the result and the value"
     def Equate(self,**values):
         if not self.variables.issubset(set(values.keys())):
-            print(self.variables,values.keys())
             raise Exception("Not all variables contained in values")
         result = 0
         for op in self.eList:
-            if isinstance(op[1],str):
-                operand = values[op[1]]
-            elif isinstance(op[1],Expression):
-                operand = op[1].Equate(**values)
-            elif isinstance(op[1],float) or isinstance(op[1],int):
-                operand = float(op[1])
-            result = operators[op[0]](result,operand)
+            operator = op[0]
+            operand = op[1]
+            if isinstance(operand,str):
+                newOperand = values[op[1]]
+            elif isinstance(operand,Expression):
+                newOperand = operand.Equate(**values)
+                print(operand.eList)
+            elif isinstance(operand,float):
+                newOperand = operand
+            result = operators[operator](result,newOperand)
         return result
+
+
+
+    """def __str__(self):
+        outstring = ''
+        print('layer')
+        i=0
+        for op in self.eList:
+            if i==0 and op[0]=='+':
+                outstring += str(op[1])
+                i+=1
+                continue
+            if isinstance(op[1],Expression):
+                outstring += op[0] + str(op[1])
+                i+=1
+                continue
+            outstring = '(' + outstring
+            outstring += op[0] + str(op[1])
+            outstring += ')'
+            print(outstring)
+            i+=1
+        print('exit layer')
+        return outstring"""
+
+
+
 
 
     "Turns operators such as +,-,*,/ into the apply operator function respectively"
@@ -64,3 +94,7 @@ class Expression(object):
         return self.ApplyOperator('**',operand)
     def __floordiv__(self,operand):
         return self.ApplyOperator('//',operand)
+
+d = Expression('v0')*'t'+Expression(1/2)*'a'*Expression('t')**2
+
+d.Equate(v0=5,t=4,a=6)
