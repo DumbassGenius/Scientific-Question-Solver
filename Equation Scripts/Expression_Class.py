@@ -1,11 +1,12 @@
 from operator import *
+from copy import *
 
 def root(x,y):
     return x**(1/y)
 
 "Equates each operator to a function. // is not floor div but a root, much in the same way ** is power"
 operators = {'+':add,'-':sub,'*':mul,'/':truediv,'**':pow,'//':root}
-
+opposite = {'+':'-','-':'+','*':'/','/':'*','**':'//','//':'**'}
 
 
 class Expression(object):
@@ -54,6 +55,40 @@ class Expression(object):
             result = operators[operator](result,newOperand)
         return result
 
+    def SolveforX(self,x):
+        xEx = deepcopy(self)
+        yEx = Expression()
+        yEx.variables = xEx.variables.symmetric_difference(x)
+        i=0
+        while xEx.eList != Expression(x).eList and i!=len(self.eList)*2:
+            print(xEx.eList,yEx.eList)
+            operation = xEx.eList.pop()
+            operator = operation[0]
+            operand = operation[1]
+            if operand == x or (isinstance(operand,Expression) and x in operand.variables):
+
+                if operation in ['-','/']:
+                    yEx.ApplyOperator(operation,operand)
+                    yEx.ApplyOperator({'-':'*','/':'**'},-1)
+                    xEx = Expression(operand)
+                elif operation in ['**','//']:
+                    raise Exception("Can't solve")
+                else:
+                    print(operation)
+                    yEx.ApplyOperator(opposite[operator],xEx)
+                if isinstance(operand,Expression):
+                    xEx = operand
+                else:
+                    xEx = Expression(operand)
+            else:
+                yEx.ApplyOperator(opposite[operator],operand)
+            i+=1
+        return yEx
+    def __repr__(self):
+        return str(self.eList)
+
+
+
 
 
     """def __str__(self):
@@ -95,6 +130,8 @@ class Expression(object):
     def __floordiv__(self,operand):
         return self.ApplyOperator('//',operand)
 
-d = Expression('v0')*'t'+Expression(1/2)*'a'*Expression('t')**2
+x = Expression('a')*'b'-Expression('c')*'d'
 
-d.Equate(v0=5,t=4,a=6)
+b = x.SolveforX('d')
+
+print(b.eList)
