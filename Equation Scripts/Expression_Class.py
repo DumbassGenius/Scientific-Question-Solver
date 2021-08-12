@@ -56,25 +56,28 @@ class Expression(object):
         return result
 
     def SolveforX(self,x):
+        if not x in self.variables:
+            raise Exception('X not in Expression')
         xEx = deepcopy(self)
         yEx = Expression()
         yEx.variables = xEx.variables.symmetric_difference(x)
         i=0
-        while xEx.eList != Expression(x).eList and i!=len(self.eList)*2:
+        while xEx.eList != Expression(x).eList:
+            if i==len(self.eList)*2:
+                raise Exception("Can't solve")
             print(xEx.eList,yEx.eList)
             operation = xEx.eList.pop()
             operator = operation[0]
             operand = operation[1]
             if operand == x or (isinstance(operand,Expression) and x in operand.variables):
 
-                if operation in ['-','/']:
-                    yEx.ApplyOperator(operation,operand)
-                    yEx.ApplyOperator({'-':'*','/':'**'},-1)
+                if operator in ['-','/']:
+                    yEx.ApplyOperator(operator,xEx)
+                    yEx.ApplyOperator({'-':'*','/':'**'}[operator],-1)
                     xEx = Expression(operand)
-                elif operation in ['**','//']:
+                elif operator in ['**','//']:
                     raise Exception("Can't solve")
                 else:
-                    print(operation)
                     yEx.ApplyOperator(opposite[operator],xEx)
                 if isinstance(operand,Expression):
                     xEx = operand
@@ -83,6 +86,7 @@ class Expression(object):
             else:
                 yEx.ApplyOperator(opposite[operator],operand)
             i+=1
+
         return yEx
     def __repr__(self):
         return str(self.eList)
@@ -130,8 +134,8 @@ class Expression(object):
     def __floordiv__(self,operand):
         return self.ApplyOperator('//',operand)
 
-x = Expression('a')*'b'-Expression('c')*'d'
+x = Expression(6.67*10**-11)*'m1'*'m2'/Expression('r')**2 - 'Fg'
 
-b = x.SolveforX('d')
+b = x.SolveforX('r')
 
 print(b.eList)
