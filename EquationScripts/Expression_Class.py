@@ -60,12 +60,10 @@ class Expression(object):
             raise Exception('X not in Expression')
         xEx = deepcopy(self)
         yEx = Expression()
-        yEx.variables = xEx.variables.symmetric_difference(x)
         i=0
         while xEx.eList != Expression(x).eList:
             if i==len(self.eList)*2:
                 raise Exception("Can't solve")
-            print(xEx.eList,yEx.eList)
             operation = xEx.eList.pop()
             operator = operation[0]
             operand = operation[1]
@@ -87,7 +85,10 @@ class Expression(object):
                 yEx.ApplyOperator(opposite[operator],operand)
             i+=1
 
+        yEx.variables = self.variables.symmetric_difference(x)
         return yEx
+
+
     def __repr__(self):
         return str(self.eList)
 
@@ -134,8 +135,6 @@ class Expression(object):
     def __floordiv__(self,operand):
         return self.ApplyOperator('//',operand)
 
-x = Expression(6.67*10**-11)*'m1'*'m2'/Expression('r')**2 - 'Fg'
+V = Expression('v0')**2 + Expression(2)*'a'*'d' - Expression('v')**2
 
-b = x.SolveforX('r')
-
-print(b.eList)
+print(V.SolveforX('d').variables)
