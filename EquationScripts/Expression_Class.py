@@ -55,6 +55,7 @@ class Expression(object):
             result = operators[operator](result,newOperand)
         return result
 
+
     def SolveforX(self,x):
         if not x in self.variables:
             raise Exception('X not in Expression')
@@ -87,6 +88,19 @@ class Expression(object):
 
         yEx.variables = self.variables.symmetric_difference(x)
         return yEx
+
+
+    def substitudeVars(self,**vars):
+        exp = deepcopy(self)
+        for i in range(len(exp.eList)):
+            operation = exp.eList[i]
+            if operation[1] in vars:
+                exp.eList[i] = (operation[0],vars[operation[1]])
+            elif isinstance(operation[1],Expression):
+                exp.eList[i] = operation[1].substitudeVars(**vars)
+        return exp
+
+
 
 
     def __repr__(self):
@@ -135,6 +149,10 @@ class Expression(object):
     def __floordiv__(self,operand):
         return self.ApplyOperator('//',operand)
 
-V = Expression('v0')**2 + Expression(2)*'a'*'d' - Expression('v')**2
 
-print(V.SolveforX('d').variables)
+x= [1,2,3,4,5]
+
+for i in x:
+    i=7
+print(x)
+print((Expression(1)-Expression('p')).substitudeVars(p=Expression('z')))
